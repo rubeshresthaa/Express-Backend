@@ -131,3 +131,20 @@ export const createLoad = async (req: Request, res: Response): Promise<void> => 
     });
   }
 };
+
+export const getDriverLoads = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { driverId } = req.params;
+    const loads = await Load.find({ driverId, status: 'ACCEPTED' }).sort({ updatedAt: -1 });
+    res.status(200).json({
+      success: true,
+      data: loads,
+    });
+  } catch (error) {
+    console.error('Error fetching driver loads:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching your loads',
+    });
+  }
+};
