@@ -1,6 +1,10 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
+import connectDB from './db';
 import loadRoutes from './routes/loadRoutes';
+
+// Connect to Database
+connectDB();
 
 const app: Application = express();
 
