@@ -1,12 +1,16 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import connectDB from './db';
+import { setupSwagger } from './config/swagger';
 import loadRoutes from './routes/loadRoutes';
 
 // Connect to Database
 connectDB();
 
 const app: Application = express();
+
+// Swagger Documentation
+setupSwagger(app);
 
 app.use(cors());
 app.use(express.json());
