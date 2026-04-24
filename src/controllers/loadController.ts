@@ -1,10 +1,6 @@
 import { Request, Response } from 'express';
 import Load, { ILoad } from '../models/Load';
 
-/**
- * Get all PENDING loads
- * GET /api/loads
- */
 export const getPendingLoads = async (req: Request, res: Response): Promise<void> => {
   try {
     const loads = await Load.find({ status: 'PENDING' }).sort({ createdAt: -1 });
@@ -21,10 +17,6 @@ export const getPendingLoads = async (req: Request, res: Response): Promise<void
   }
 };
 
-/**
- * Accept a specific load
- * PATCH /api/loads/:id/accept
- */
 export const acceptLoad = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
@@ -47,7 +39,7 @@ export const acceptLoad = async (req: Request, res: Response): Promise<void> => 
           driverId: driverId 
         } 
       },
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     if (!updatedLoad) {
@@ -90,6 +82,52 @@ export const acceptLoad = async (req: Request, res: Response): Promise<void> => 
     res.status(500).json({
       success: false,
       message: 'Server error while accepting load',
+    });
+  }
+};
+
+export const createLoad = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { origin, destination, weight, vehicleTypeRequired, price } = req.body;
+
+    if (!origin || !destination || !weight || !vehicleTypeRequired || !price) {
+      res.status(400).json({
+        success: false,
+        message: 'Please provide all required fields: origin, destination, weight, vehicleTypeRequired, price',
+      });
+      return;
+    }
+
+    const newLoad = new Load({
+      origin,
+      destination,
+      weight,
+      vehicleTypeRequired,
+      price,
+    });
+
+    const savedLoad = await newLoad.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Load created successfully',
+      data: savedLoad,
+    });
+  } catch (error: any) {
+    console.error('Error creating load:', error);
+    
+    if (error.name === 'ValidationError') {
+      res.status(400).json({
+        success: false,
+        message: 'Validation Error',
+        errors: Object.values(error.errors).map((err: any) => err.message),
+      });
+      return;
+    }
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error while creating load',
     });
   }
 };
